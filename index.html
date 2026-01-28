@@ -2,65 +2,36 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>BEIN Web Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My IPTV Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
-html, body { margin:0; padding:0; width:100%; height:100%; background:black; }
-video { width:100%; height:100%; background:black; }
-#loading {
-    position:absolute; inset:0; display:flex; justify-content:center; align-items:center;
-    color:#fff; font-size:18px; background:rgba(0,0,0,0.7); z-index:10;
-}
-#controls {
-    position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
-    color:#fff; font-size:16px; z-index:20; background:rgba(0,0,0,0.5); padding:5px 10px;
-    border-radius:5px;
-}
+body{background:#000;color:#fff;text-align:center}
+video{width:100%;max-height:90vh}
 </style>
 </head>
 <body>
 
-<div id="loading">جاري تحميل البث...</div>
-<video id="player" controls autoplay playsinline></video>
-<div id="controls">BEIN SPORTS 1</div>
+<h3 id="title"></h3>
+<video id="video" controls autoplay></video>
 
-<script>
-// رابط Proxy جاهز للبث
-const STREAM_URL = "https://m3u8.ppopculture.workers.dev/m3u8-proxy?url=https://v5on.site/api/playlist.php?id=146116&referer=http://v5on.site/&headers={\"User-Agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\"}";
+<script type="module">
+import { STREAM_TEXT } from './stream.js'
+import { parseStream } from './parser.js'
 
-const video = document.getElementById("player");
-const loading = document.getElementById("loading");
+const ch = parseStream(STREAM_TEXT)
+document.getElementById('title').textContent = ch.title
 
-function playStream() {
-    if(Hls.isSupported()){
-        const hls = new Hls({enableWorker:true, maxBufferLength:20});
-        hls.loadSource(STREAM_URL);
-        hls.attachMedia(video);
+const video = document.getElementById('video')
 
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play();
-            loading.style.display = "none";
-        });
+const hls = new Hls({
+  xhrSetup: xhr => {
+    if (ch.referrer) xhr.setRequestHeader('Referer', ch.referrer)
+    if (ch.userAgent) xhr.setRequestHeader('User-Agent', ch.userAgent)
+  }
+})
 
-        hls.on(Hls.Events.ERROR, () => {
-            console.warn("حدث خطأ، إعادة التحميل...");
-            setTimeout(playStream, 1500);
-        });
-
-    } else {
-        video.src = STREAM_URL;
-        video.play();
-        loading.style.display = "none";
-    }
-}
-
-// إعادة التشغيل عند توقف الفيديو مؤقتًا
-video.addEventListener("error", () => setTimeout(playStream,1500));
-video.addEventListener("stalled", () => setTimeout(playStream,1500));
-
-// بدء البث
-playStream();
+hls.loadSource(ch.url)
+hls.attachMedia(video)
 </script>
 
 </body>
