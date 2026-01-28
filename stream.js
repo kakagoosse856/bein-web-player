@@ -1,0 +1,6 @@
+export const STREAM_TEXT = `
+#EXTINF:-1,BEIN SPORTS 1
+#EXTVLCOPT:http-referrer=http://v5on.site/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://v5on.site/api/playlist.php?id=146116
+`
